@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "146521422465",
+    "project_id": "indoor-plant-watering-system",
+    "storage_bucket": "indoor-plant-watering-system.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146521422465:android:73ce0021bf1a28e08f6b80",
+        "android_client_info": {
+          "package_name": "com.hadu.plantwatering"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "146521422465-rigor8q88n6450u849lfoq9c5m8tcaoq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hadu.plantwatering",
+            "certificate_hash": "2d7a3f743b5709be099b5b22ab8185fe8eddf84c"
+          }
+        },
+        {
+          "client_id": "146521422465-e67nhfmdd198em738a7ugvbu7lf9mav5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwuN7TVO7SI6X-c4XqzCBsibcLgZkVFxQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "146521422465-e67nhfmdd198em738a7ugvbu7lf9mav5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "146521422465-5p7jbgbq6b1aipm5bh2m8fqunkvltaf6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.indoorPlantWateringApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

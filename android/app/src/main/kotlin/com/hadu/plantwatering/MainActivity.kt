@@ -1,4 +1,4 @@
-package com.example.indoor_plant_watering_app
+package com.hadu.plantwatering
 
 import io.flutter.embedding.android.FlutterActivity
 

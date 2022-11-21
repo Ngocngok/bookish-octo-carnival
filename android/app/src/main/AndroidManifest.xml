@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.indoor_plant_watering_app">
+    package="com.hadu.plantwatering">
    <application
         android:label="indoor_plant_watering_app"
         android:name="${applicationName}"
