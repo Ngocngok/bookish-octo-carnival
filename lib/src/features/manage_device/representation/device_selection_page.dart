@@ -1,6 +1,6 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:indoor_plant_watering_app/src/common_widgets/add_device_item.dart';
 import 'package:indoor_plant_watering_app/src/common_widgets/custom_drawer.dart';
 import 'package:indoor_plant_watering_app/src/common_widgets/device_item.dart';
 
@@ -13,7 +13,6 @@ class DeviceSelectionPage extends StatefulWidget {
 
 class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
   int _count = 0;
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
@@ -100,7 +99,7 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
                             Text(
                               ' ${user?.displayName}',
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
@@ -163,92 +162,7 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
                             DeviceItem(),
                             DeviceItem(),
                             DeviceItem(),
-                            GestureDetector(
-                              onTap: () {
-                                print(user?.displayName ?? user?.email);
-                              },
-                              child: SizedBox(
-                                child: DottedBorder(
-                                  borderType: BorderType.RRect,
-                                  color: Colors.black12,
-                                  strokeWidth: 5,
-                                  borderPadding: const EdgeInsets.all(2.5),
-                                  radius: const Radius.circular(25),
-                                  dashPattern: const [
-                                    16,
-                                    6,
-                                  ],
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: const Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: Icon(
-                                            Icons.add_circle_outline_rounded,
-                                            color: Colors.black12,
-                                            size: 50,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: const Align(
-                                          alignment: Alignment.topCenter,
-                                          child: Text(
-                                            'Add new device',
-                                            style: TextStyle(
-                                                color: Colors.black12,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // SizedBox(
-                            //   child: DecoratedBox(
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.black,
-                            //       borderRadius: BorderRadius.all(
-                            //         Radius.circular(15),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                            // SizedBox(
-                            //   child: DecoratedBox(
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.black,
-                            //       borderRadius: BorderRadius.all(
-                            //         Radius.circular(15),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                            // SizedBox(
-                            //   child: DecoratedBox(
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.black,
-                            //       borderRadius: BorderRadius.all(
-                            //         Radius.circular(15),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                            // SizedBox(
-                            //   child: DecoratedBox(
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.black,
-                            //       borderRadius: BorderRadius.all(
-                            //         Radius.circular(15),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
+                            AddDeviceItem(user: user),
                           ],
                         ),
                       ),
