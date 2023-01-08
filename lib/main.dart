@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/device_monitoring_page.dart';
 import 'src/constants/firebase_options.dart';
 
 import 'package:indoor_plant_watering_app/src/theme/theme_constant.dart';
@@ -29,10 +31,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: mainTheme(),
-      initialRoute: '/',
+      initialRoute: FirebaseAuth.instance.currentUser == null ? LoginPage.routeName : DeviceSelectionPage.routeName,
       routes: {
-        '/': (context) => const LoginPage(),
-        '/device_selection': (context) => const DeviceSelectionPage(),
+        LoginPage.routeName: (context) => const LoginPage(),
+        DeviceSelectionPage.routeName: (context) => const DeviceSelectionPage(),
+        DeviceMonitoringPage.routeName: (context) =>
+            const DeviceMonitoringPage(),
       },
     );
   }

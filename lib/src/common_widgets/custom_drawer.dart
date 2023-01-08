@@ -1,6 +1,7 @@
-import 'dart:ui';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:indoor_plant_watering_app/src/features/authentication/representation/login_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({
@@ -9,34 +10,103 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+
     return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+      ),
       child: ListView(
-        children: const <Widget>[
-          DrawerHeader(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          UserAccountsDrawerHeader(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: <Color>[
-                  Color.fromARGB(255, 255, 191, 0),
-                  Color.fromARGB(255, 255, 255, 255),
-                ],
+              color: Color.fromARGB(255, 217, 247, 244),
+              image: DecorationImage(
+                  image: AssetImage('assets/TreeLeft.png'),
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.bottomRight),
+            ),
+            accountName: Text(
+              (user != null &&
+                      user.displayName != null &&
+                      user.displayName!.isNotEmpty)
+                  ? user.displayName!
+                  : "User",
+              style: const TextStyle(
+                color: Colors.teal,
               ),
             ),
-            child: Text('data'),
+            accountEmail: Text(
+              user!.email!,
+              style: const TextStyle(
+                color: Colors.teal,
+              ),
+            ),
+            currentAccountPicture: UserAvatar(
+              size: 72,
+              auth: FirebaseAuth.instance,
+              placeholderColor: Colors.teal,
+            ),
           ),
-          ListTile(
-            title: Text('home'),
+          const ListTile(
+            leading: Icon(
+              Icons.notifications,
+              color: Colors.teal,
+            ),
+            title: Text(
+              "Notifications",
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
           ),
-          ListTile(
-            title: Text('home'),
+          const Divider(),
+          const ListTile(
+            leading: Icon(
+              Icons.share,
+              color: Colors.teal,
+            ),
+            title: Text(
+              "Share",
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
           ),
-          ListTile(
-            title: Text('home'),
+          const ListTile(
+            leading: Icon(
+              Icons.info_outline,
+              color: Colors.teal,
+            ),
+            title: Text(
+              "About",
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
           ),
+          const Divider(),
           ListTile(
-            title: Text('home'),
-          ),
-          ListTile(
-            title: Text('home'),
+            onTap: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pushReplacementNamed(context, LoginPage.routeName);
+            },
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.teal,
+            ),
+            title: const Text(
+              "Log out",
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
           ),
         ],
       ),

@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/device_monitoring_page.dart';
 
 class DeviceItem extends StatefulWidget {
   const DeviceItem({
     Key? key,
+    required this.index,
+    required this.deviceID,
+    required this.name,
   }) : super(key: key);
+
+  final int index;
+  final String deviceID;
+  final String name;
 
   @override
   State<DeviceItem> createState() => _DeviceItemState();
+}
+
+Color getBackgroundColor(int index) {
+  switch (index % 4) {
+    case 0:
+      return const Color.fromARGB(255, 111, 221, 199);
+    case 1:
+      return const Color.fromARGB(255, 148, 208, 229);
+    case 2:
+      return const Color.fromARGB(255, 164, 160, 230);
+    case 3:
+      return const Color.fromARGB(255, 248, 142, 90);
+    default:
+      return const Color.fromARGB(255, 148, 208, 229);
+  }
 }
 
 class _DeviceItemState extends State<DeviceItem> {
@@ -14,13 +37,20 @@ class _DeviceItemState extends State<DeviceItem> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print('Open device');
+        Navigator.pushNamed(
+          context,
+          DeviceMonitoringPage.routeName,
+          arguments: DevicePageMonitoringArguments(
+            widget.deviceID,
+            widget.name,
+          ),
+        );
       },
       child: SizedBox(
         child: DecoratedBox(
-            decoration: const BoxDecoration(
-              color: Color.fromRGBO(111, 221, 199, 1),
-              borderRadius: BorderRadius.all(
+            decoration: BoxDecoration(
+              color: getBackgroundColor(widget.index),
+              borderRadius: const BorderRadius.all(
                 Radius.circular(25),
               ),
             ),
@@ -37,11 +67,11 @@ class _DeviceItemState extends State<DeviceItem> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(left: 12),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12),
                             child: Text(
-                              'Device',
-                              style: TextStyle(
+                              widget.deviceID,
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16),
@@ -54,7 +84,7 @@ class _DeviceItemState extends State<DeviceItem> {
                               color: Colors.white,
                             ),
                             onPressed: (() {
-                              print('b');
+                              debugPrint('b');
                             }),
                           ),
                         ],
@@ -72,13 +102,13 @@ class _DeviceItemState extends State<DeviceItem> {
                       ),
                     ),
                   ),
-                  const Expanded(
+                  Expanded(
                     flex: 2,
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                        'ESP8266',
-                        style: TextStyle(
+                        widget.name,
+                        style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.w700),

@@ -42,6 +42,9 @@ dependencies:
   firebase_core: ^2.1.1
   google_fonts: ^3.0.1
   dotted_border: ^2.0.0+3
+  cloud_firestore: ^4.3.0
+  syncfusion_flutter_gauges: ^20.4.38
+  syncfusion_flutter_charts: ^20.4.38
 
 dev_dependencies:
   flutter_test:
