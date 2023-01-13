@@ -13,15 +13,11 @@ class CustomDrawer extends StatelessWidget {
     final User? user = FirebaseAuth.instance.currentUser;
 
     return Drawer(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
-      ),
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color.fromARGB(255, 217, 247, 244),
               image: DecorationImage(
                   image: AssetImage('assets/TreeLeft.png'),
@@ -44,6 +40,8 @@ class CustomDrawer extends StatelessWidget {
                 color: Colors.teal,
               ),
             ),
+            currentAccountPictureSize: const Size.square(72),
+            
             currentAccountPicture: UserAvatar(
               size: 72,
               auth: FirebaseAuth.instance,

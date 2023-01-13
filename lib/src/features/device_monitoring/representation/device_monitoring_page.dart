@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/humidity_tab.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/moisture_tab.dart';
-import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/pump_tab.dart';
+import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/control_tab.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/temperature_tab.dart';
 
 import '../../../common_widgets/component_tab.dart';
@@ -32,12 +32,12 @@ class _DeviceMonitoringPageState extends State<DeviceMonitoringPage>
 
     // moisture tab
     ComponentTab(
-      icon: Icons.water_outlined,
+      icon: Icons.water_drop,
     ),
 
     // pump tab
     ComponentTab(
-      icon: Icons.water_drop_outlined,
+      icon: Icons.settings,
     ),
   ];
 
@@ -124,16 +124,16 @@ class _DeviceMonitoringPageState extends State<DeviceMonitoringPage>
                 controller: _tabController,
                 children: [
                   // temperature page
-                  TemperatureTab(),
+                  TemperatureTab(deviceID),
 
                   // humidity page
                   HumidityTab(deviceID),
 
                   // moisture page
-                  MoistureTab(),
+                  MoistureTab(deviceID),
 
                   // pump page
-                  PumpTab(),
+                  ControlTab(deviceID),
                 ],
               ),
             )

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
 
   FirebaseUIAuth.configureProviders([
     EmailAuthProvider(),
+     //GoogleProvider(clientId: "146521422465-e67nhfmdd198em738a7ugvbu7lf9mav5.apps.googleusercontent.com"),
     // ... other providers
   ]);
 

@@ -38,13 +38,15 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_auth: ^4.1.1
   firebase_ui_oauth_google: ^1.0.4
-  firebase_ui_auth: ^1.0.4
+  firebase_ui_auth: ^1.1.7
   firebase_core: ^2.1.1
   google_fonts: ^3.0.1
   dotted_border: ^2.0.0+3
   cloud_firestore: ^4.3.0
   syncfusion_flutter_gauges: ^20.4.38
   syncfusion_flutter_charts: ^20.4.38
+  google_sign_in: ^5.4.2
+  firebase_database: ^10.0.9
 
 dev_dependencies:
   flutter_test:

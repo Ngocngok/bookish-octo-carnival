@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:indoor_plant_watering_app/src/common_widgets/add_device_item_button.dart';
@@ -91,44 +92,48 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Welcome back,',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome back,',
+                                  style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                (user != null && user.displayName != null && user.displayName!.isNotEmpty) ? user.displayName! : "User",
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    (user != null &&
+                                            user.displayName != null &&
+                                            user.displayName!.isNotEmpty)
+                                        ? user.displayName!
+                                        : "User",
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           const SizedBox(
-                            width: 55,
-                            height: 55,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Colors.yellow,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(100)),
-                                image: DecorationImage(
-                                  image: AssetImage('assets/test.jpg'),
-                                  fit: BoxFit.fitWidth,
-                                ),
-                              ),
-                              //child: Icon(Icons.person),
-                            ),
-                          )
+                            width: 15,
+                          ),
+                          SizedBox(
+                              width: 55,
+                              height: 55,
+                              child: UserAvatar(
+                                auth: FirebaseAuth.instance,
+                                size: 55,
+                              ))
                         ],
                       ),
                     ),

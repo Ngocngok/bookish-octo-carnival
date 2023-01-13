@@ -17,20 +17,17 @@ class HumidityTab extends StatefulWidget {
 
 class _HumidityTabState extends State<HumidityTab> {
   _HumidityTabState();
-  List<_ChartData>? _chartData = <_ChartData>[
-    _ChartData(
-      x: DateTime(1980, 1, 23),
-      y: 83,
-    ),
+  List<_ChartData>? _chartData = [
+    _ChartData(x: DateTime.fromMillisecondsSinceEpoch(1), y: 0)
   ];
 
-  Timer? _timer;
+  // Timer? _timer;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? listener;
 
   @override
   void initState() {
     var collection = FirebaseFirestore.instance
-        .collection("devices") 
+        .collection("devices")
         .doc(widget.deviceID)
         .collection("monitoring_data")
         .orderBy('timestamp', descending: true)
@@ -93,7 +90,7 @@ class _HumidityTabState extends State<HumidityTab> {
                     ),
                     pointers: <GaugePointer>[
                       RangePointer(
-                          value: _chartData!.first.y?.toDouble() ?? 0,
+                          value: _chartData?.first.y?.toDouble() ?? 0,
                           width: 0.1,
                           cornerStyle: CornerStyle.bothCurve,
                           sizeUnit: GaugeSizeUnit.factor,
@@ -104,29 +101,30 @@ class _HumidityTabState extends State<HumidityTab> {
                     ],
                     annotations: <GaugeAnnotation>[
                       GaugeAnnotation(
-                          angle: 90,
-                          positionFactor: 0,
-                          widget: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              const Text(
-                                'Humidity:',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black26,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        angle: 90,
+                        positionFactor: 0,
+                        widget: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            const Text(
+                              'Humidity:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black26,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                '${_chartData!.first.y ?? 0}%',
-                                style: const TextStyle(
-                                  fontSize: 36,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            ],
-                          ))
+                            ),
+                            Text(
+                              '${_chartData?.first.y ?? 0}%',
+                              style: const TextStyle(
+                                fontSize: 36,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                     ],
                     axisLabelStyle:
                         const GaugeTextStyle(color: Color(0xFF00A8B5)),
@@ -157,7 +155,7 @@ class _HumidityTabState extends State<HumidityTab> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
         SizedBox(
@@ -179,51 +177,32 @@ class _HumidityTabState extends State<HumidityTab> {
           axisLine: const AxisLine(width: 0),
           minimum: 0,
           maximum: 100),
+      tooltipBehavior: TooltipBehavior(enable: true),
       series: _getDefaultDateTimeSeries(),
     );
   }
 
-  /// get the spline series sample with dynamically updated data points.
-  List<SplineSeries<_ChartData, num>> _getDefaultSplineSeries() {
-    return <SplineSeries<_ChartData, num>>[
-      SplineSeries<_ChartData, num>(
-          dataSource: _chartData!,
-          xValueMapper: (_ChartData sales, _) => sales.x,
-          yValueMapper: (_ChartData sales, _) => sales.y,
-          markerSettings: const MarkerSettings(isVisible: true))
-    ];
-  }
-
   @override
   void dispose() {
-    _timer?.cancel();
+    // _timer?.cancel();
     _chartData!.clear();
     listener?.cancel();
     super.dispose();
   }
 
-  /// get the random value
-  int _getRandomInt(int min, int max) {
-    final Random random = Random();
-    return min + random.nextInt(max - min);
-  }
-
-  //Get the random data points
-  void _getChartData() {
-    _chartData = <_ChartData>[];
-    for (int i = 0; i < 11; i++) {
-      _chartData!.add(_ChartData(x: i, y: _getRandomInt(15, 85)));
-    }
-    _timer?.cancel();
-  }
-
   List<LineSeries<_ChartData, DateTime>> _getDefaultDateTimeSeries() {
     return <LineSeries<_ChartData, DateTime>>[
       LineSeries<_ChartData, DateTime>(
+        name: "Humidity",
         dataSource: _chartData!,
+        markerSettings: const MarkerSettings(
+          isVisible: true,
+          width: 5,
+          height: 5,
+        ),
         xValueMapper: (_ChartData data, _) => data.x as DateTime,
         yValueMapper: (_ChartData data, _) => data.y,
-        color: const Color.fromRGBO(242, 117, 7, 1),
+        color: const Color.fromARGB(255, 7, 136, 242),
       )
     ];
   }

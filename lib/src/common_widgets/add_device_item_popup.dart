@@ -31,7 +31,7 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
             return CustomRectTween(begin: begin, end: end);
           },
           child: Material(
-            color: Colors.amber[50],
+            color: Color.fromARGB(255, 159, 217, 203),
             elevation: 2,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
@@ -45,24 +45,33 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                     children: [
                       const Text(
                         "Add new device",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 2, 139, 121),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      const Divider(
-                        color: Colors.black,
-                        thickness: 0.2,
-                      ),
+                      // const Divider(
+                      //   color: Colors.black,
+                      //   thickness: 0.2,
+                      // ),
+                      SizedBox(height: 5,),
                       TextFormField(
                         controller: deviceIDController,
                         decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: Color.fromARGB(255, 255, 216, 198),
                           labelText: 'Device ID',
                           labelStyle: TextStyle(
                             color: Colors.grey,
                           ),
                           floatingLabelStyle: TextStyle(color: Colors.black),
                           enabledBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)),
-                              borderSide:
-                                  BorderSide(color: Colors.black, width: 3.0)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20.0)),
+                            borderSide:
+                                BorderSide(color: Color.fromARGB(255, 255, 162, 97), width: 0.0),
+                          ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(20.0)),
@@ -83,13 +92,16 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                           return null;
                         },
                       ),
-                      const Divider(
-                        color: Colors.black,
-                        thickness: 0.2,
-                      ),
+                      // const Divider(
+                      //   color: Colors.black,
+                      //   thickness: 0.2,
+                      // ),
+                      SizedBox(height: 10,),
                       TextFormField(
                         controller: deviceDisplayNameController,
                         decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: Color.fromARGB(255, 255, 216, 198),
                           labelText: 'Display name',
                           labelStyle: TextStyle(color: Colors.grey),
                           floatingLabelStyle: TextStyle(color: Colors.black),
@@ -97,8 +109,9 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                           enabledBorder: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(20.0)),
-                            borderSide:
-                                BorderSide(color: Colors.black, width: 3.0),
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(255, 255, 162, 97),
+                                width: 3.0),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius:
@@ -120,10 +133,10 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                         },
                         maxLines: 1,
                       ),
-                      const Divider(
-                        color: Colors.white,
-                        thickness: 0.2,
-                      ),
+                      // const Divider(
+                      //   color: Colors.white,
+                      //   thickness: 0.2,
+                      // ),
                       TextButton(
                         onPressed: () {
                           if (_formKey.currentState?.validate() ?? false) {
