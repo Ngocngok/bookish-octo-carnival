@@ -40,7 +40,7 @@ class _MoistureTabState extends State<MoistureTab> {
               (doc) => _ChartData(
                   y: DateTime.fromMillisecondsSinceEpoch(
                       doc['timestamp'] * 1000),
-                  x: double.parse(doc['humidity'].toString())),
+                  x: double.parse(doc['earth_moisture'].toString())),
             )
             .toList();
 

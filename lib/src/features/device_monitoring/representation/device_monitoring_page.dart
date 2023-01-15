@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/humidity_tab.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/moisture_tab.dart';
-import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/control_tab.dart';
+import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/pump_tab.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/temperature_tab.dart';
 
 import '../../../common_widgets/component_tab.dart';
@@ -78,66 +78,87 @@ class _DeviceMonitoringPageState extends State<DeviceMonitoringPage>
     return DefaultTabController(
       length: componentTab.length,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 24.0),
-            child: IconButton(
-              icon: Icon(
-                Icons.arrow_back_outlined,
-                color: Colors.grey[800],
-                size: 36,
+        // appBar: AppBar(
+        //   backgroundColor: Colors.transparent,
+        //   elevation: 0,
+        //   leading: Padding(
+        //     padding: const EdgeInsets.only(left: 24.0),
+        //     child: IconButton(
+        //       icon: Icon(
+        //         Icons.arrow_back_outlined,
+        //         color: Colors.grey[800],
+        //         size: 36,
+        //       ),
+        //       onPressed: () {
+        //         Navigator.pop(context);
+        //       },
+        //     ),
+        //   ),
+        // ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                          onTap: Navigator.of(context).pop,
+                          child: Icon(
+                            Icons.arrow_back_outlined,
+                            size: 20,
+                          )),
+                    ),
+                    Expanded(
+                      flex: 6,
+                      child: Center(
+                        child: Text(
+                          header?.header ?? "",
+                          style:
+                              TextStyle(fontSize: 20, color: Colors.grey[600]),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(),
+                    ),
+                  ],
+                ),
               ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
-              child: Row(
-                children: [
-                  Text(
-                    header?.header ?? "",
-                    style: TextStyle(fontSize: 24, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ),
 
-            // tab bar
-            TabBar(
-              controller: _tabController,
-              tabs: componentTab,
-              isScrollable: false,
-            ),
-
-            // tab bar view
-            Expanded(
-              child: TabBarView(
+              // tab bar
+              TabBar(
                 controller: _tabController,
-                children: [
-                  // temperature page
-                  TemperatureTab(deviceID),
-
-                  // humidity page
-                  HumidityTab(deviceID),
-
-                  // moisture page
-                  MoistureTab(deviceID),
-
-                  // pump page
-                  ControlTab(deviceID),
-                ],
+                tabs: componentTab,
+                isScrollable: false,
               ),
-            )
-          ],
+
+              // tab bar view
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // temperature page
+                    TemperatureTab(deviceID),
+
+                    // humidity page
+                    HumidityTab(deviceID),
+
+                    // moisture page
+                    MoistureTab(deviceID),
+
+                    // pump page
+                    ControlTab(deviceID),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

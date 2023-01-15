@@ -52,6 +52,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '146521422465',
     projectId: 'indoor-plant-watering-system',
     authDomain: 'indoor-plant-watering-system.firebaseapp.com',
+    databaseURL: 'https://indoor-plant-watering-system-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'indoor-plant-watering-system.appspot.com',
     measurementId: 'G-33H3V0PLEE',
   );
@@ -61,6 +62,7 @@ class DefaultFirebaseOptions {
     appId: '1:146521422465:android:73ce0021bf1a28e08f6b80',
     messagingSenderId: '146521422465',
     projectId: 'indoor-plant-watering-system',
+    databaseURL: 'https://indoor-plant-watering-system-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'indoor-plant-watering-system.appspot.com',
   );
 
@@ -69,6 +71,7 @@ class DefaultFirebaseOptions {
     appId: '1:146521422465:ios:4ef784ed5f8483cf8f6b80',
     messagingSenderId: '146521422465',
     projectId: 'indoor-plant-watering-system',
+    databaseURL: 'https://indoor-plant-watering-system-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'indoor-plant-watering-system.appspot.com',
     androidClientId: '146521422465-rigor8q88n6450u849lfoq9c5m8tcaoq.apps.googleusercontent.com',
     iosClientId: '146521422465-5p7jbgbq6b1aipm5bh2m8fqunkvltaf6.apps.googleusercontent.com',
