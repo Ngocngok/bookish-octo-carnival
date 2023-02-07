@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,7 @@ class _ControlTabState extends State<ControlTab> {
   bool pickDurationTextValidation = false;
 
   bool pumpStatus = false;
+  bool notificationStatus = false;
   bool isPumpInfoTabExpanded = false;
   bool isPumpSettingTabExpanded = false;
   bool isAutoWateringOn = false;
@@ -46,6 +48,31 @@ class _ControlTabState extends State<ControlTab> {
         debugPrint("." + data.toString() + " " + pumpStatus.toString());
       });
     });
+
+    FirebaseFirestore.instance
+        .collection('devices')
+        .doc(widget.deviceID)
+        .get()
+        .then((doc) => {
+              if (!doc.exists ||
+                  doc.data()!['token'] == null ||
+                  doc.data()!['token'].toString().isEmpty)
+                {
+                  setState(
+                    () {
+                      notificationStatus = false;
+                    },
+                  )
+                }
+              else
+                {
+                  setState(
+                    () {
+                      notificationStatus = true;
+                    },
+                  )
+                }
+            });
 
     lastActiveTimeStream =
         pumpStatusRef.child('lastUpTime').onValue.listen((DatabaseEvent event) {
@@ -82,22 +109,24 @@ class _ControlTabState extends State<ControlTab> {
     // });
 
     //get auto watering time
-    pumpStatusRef
-        .child('autoWateringTime')
-        .once(DatabaseEventType.value)
-        .then((event) {
-      setState(() {
-        isAutoWateringOn = int.parse(event.snapshot.value.toString()) > 0;
-        int time = int.parse(event.snapshot.value.toString());
-        if (time > 0) {
-          time = time > DateTime.now().timeZoneOffset.inSeconds
-              ? time - DateTime.now().timeZoneOffset.inSeconds
-              : 86400 + time - DateTime.now().timeZoneOffset.inSeconds;
-        } else {
-          scheduledTime = const TimeOfDay(hour: 18, minute: 0);
-        }
-      });
-    });
+    // pumpStatusRef
+    //     .child('autoWateringTime')
+    //     .once(DatabaseEventType.value)
+    //     .then((event) {
+    //   setState(() {
+    //     isAutoWateringOn = int.parse(event.snapshot.value.toString()) > 0;
+    //     int time = int.parse(event.snapshot.value.toString());
+    //     if (time > 0) {
+    //       time = time + DateTime.now().timeZoneOffset.inSeconds < 86400
+    //           ? time + DateTime.now().timeZoneOffset.inSeconds
+    //           : -86400 + time + DateTime.now().timeZoneOffset.inSeconds;
+    //       scheduledTime =
+    //           TimeOfDay(hour: time ~/ 3600, minute: time % 3600 ~/ 60);
+    //     } else {
+    //       scheduledTime = const TimeOfDay(hour: 18, minute: 0);
+    //     }
+    //   });
+    // });
 
     //get watering duration
     pumpStatusRef.child('duration').once(DatabaseEventType.value).then((event) {
@@ -105,7 +134,7 @@ class _ControlTabState extends State<ControlTab> {
         isWateringDurationSet = int.parse(event.snapshot.value.toString()) > 0;
         wateringDuration = int.parse(event.snapshot.value.toString()) > 0
             ? int.parse(event.snapshot.value.toString())
-            : 120;
+            : 20;
       });
     });
     super.initState();
@@ -121,251 +150,278 @@ class _ControlTabState extends State<ControlTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "Water pump",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "Power",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
-                            color: Colors.grey),
-                      ),
-                      Switch(
-                        value: pumpStatus,
-                        onChanged: togglePumpButton,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        pumpStatus ? "On" : "Idle",
-                        style: TextStyle(
-                          color: pumpStatus ? Colors.green : Colors.grey,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        "Status",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-                      const Image(
-                        image: AssetImage('assets/water_pump.png'),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "Last active time:",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      Text(
-                        DateFormat('yyyy-MM-dd – kk:mm').format(lastActiveTime),
-                        style: TextStyle(),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 149, 167, 143),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Schedule",
-                              style: TextStyle(
-                                color: Colors.white,
+    return Stack(
+      children: [
+        SizedBox(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          const Text(
+                            "Water pump",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            "Power",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
                                 fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
+                                color: Colors.grey),
+                          ),
+                          Switch(
+                            value: pumpStatus,
+                            onChanged: togglePumpButton,
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            pumpStatus ? "On" : "Idle",
+                            style: TextStyle(
+                              color: pumpStatus ? Colors.green : Colors.grey,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w600,
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            pumpScheduleWidget(),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            pumpActiveIntervalWidget()
-                          ],
-                        ),
+                          ),
+                          Text(
+                            "Status",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: SizedBox(
-                      child: DecoratedBox(
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 20,
+                          ),
+                          const Image(
+                            image: AssetImage('assets/water_pump.png'),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "Last active time:",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Text(
+                            DateFormat('yyyy-MM-dd – kk:mm')
+                                .format(lastActiveTime),
+                            style: TextStyle(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      DecoratedBox(
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 159, 176, 153),
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(15),
+                          ),
+                          // border: Border.all(
+                          //   color: Colors.teal,
+                          //   width: 5,
+                          // ),
+                          color: Colors.green[50],
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Pump information",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
+                        child: SizedBox(
+                          width: 180,
+                          height: 140,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Icon(
+                                      Icons.notifications,
+                                      size: 30,
+                                      color: Colors.teal,
+                                    ),
+                                    Switch(
+                                      value: notificationStatus,
+                                      onChanged: toggleNotificationButton,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "Power",
-                                    style: TextStyle(color: Colors.white),
+                                SizedBox(height: 10),
+                                Text(
+                                  "Notifications",
+                                  style: TextStyle(
+                                    color: Colors.teal,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "60",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      Text(
-                                        " watt",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
+                                ),
+                                Text(
+                                  notificationStatus ? "On" : "Off",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: notificationStatus
+                                        ? Colors.teal
+                                        : Colors.grey,
                                   ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "Flow rate",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "8",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      Text(
-                                        " l/min",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "Max pressure",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "0.95",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      Text(
-                                        " Amp",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(15),
+                          ),
+                          // border: Border.all(
+                          //   color: Colors.teal,
+                          //   width: 5,
+                          // ),
+                          color: Colors.green[50],
+                        ),
+                        child: SizedBox(
+                          width: 140,
+                          height: 140,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Water duration",
+                                  style: TextStyle(
+                                    color: Colors.teal,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "60",
+                                      style: TextStyle(
+                                        fontSize: 40,
+                                        fontWeight: FontWeight.w300,
+                                        color: notificationStatus
+                                            ? Colors.teal
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                    Text(" s"),
+                                    Icon(Icons.mode),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        DraggableScrollableSheet(
+          initialChildSize: .2,
+          minChildSize: .2,
+          maxChildSize: .5,
+          snap: true,
+          builder: (BuildContext context, myScrollController) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(30),
+                    ),
+                    child: ListView(
+                      controller: myScrollController,
+                      children: [
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.amber,
+                          ),
+                          child: SizedBox(
+                            height: 400,
+                          ),
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                          ),
+                          child: SizedBox(
+                            height: 400,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        myScrollController.animateTo(
+                          1,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.ease,
+                        );
+                      },
+                      child: Icon(Icons.menu, color: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(20),
+                        backgroundColor: Colors.blue, // <-- Button color
+                        foregroundColor: Colors.red, // <-- Splash color
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -567,6 +623,34 @@ class _ControlTabState extends State<ControlTab> {
       });
       debugPrint("Toggle " + pumpStatus.toString());
     });
+  }
+
+  toggleNotificationButton(bool toggle) async {
+    var docRef =
+        FirebaseFirestore.instance.collection('devices').doc(widget.deviceID);
+    if (!toggle) {
+      // var doc = await docRef.get();
+      // if (!doc.exists ||
+      //     doc.data()!['token'] == null ||
+      //     doc.data()!['token'].toString().isEmpty) {
+      //   return;
+      // }
+
+      await docRef.update({"token": ""});
+      setState(() {
+        notificationStatus = toggle;
+      });
+      return;
+    }
+
+    String? token = await FirebaseMessaging.instance.getToken();
+    docRef.update({"token": token}).then(
+      (value) => setState(
+        () {
+          notificationStatus = toggle;
+        },
+      ),
+    );
   }
 
   Future<TimeOfDay?> pickTime() {

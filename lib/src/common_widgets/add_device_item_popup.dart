@@ -15,6 +15,7 @@ class AddDevicePopupCard extends StatefulWidget {
 
 class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? _errorMsg;
   @override
   Widget build(BuildContext context) {
     final TextEditingController deviceIDController = TextEditingController();
@@ -55,22 +56,26 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                       //   color: Colors.black,
                       //   thickness: 0.2,
                       // ),
-                      SizedBox(height: 5,),
+                      SizedBox(
+                        height: 5,
+                      ),
                       TextFormField(
                         controller: deviceIDController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           filled: true,
                           fillColor: Color.fromARGB(255, 255, 216, 198),
                           labelText: 'Device ID',
                           labelStyle: TextStyle(
                             color: Colors.grey,
                           ),
+                          errorText: _errorMsg,
                           floatingLabelStyle: TextStyle(color: Colors.black),
                           enabledBorder: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(20.0)),
-                            borderSide:
-                                BorderSide(color: Color.fromARGB(255, 255, 162, 97), width: 0.0),
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(255, 255, 162, 97),
+                                width: 0.0),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius:
@@ -96,7 +101,9 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                       //   color: Colors.black,
                       //   thickness: 0.2,
                       // ),
-                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 10,
+                      ),
                       TextFormField(
                         controller: deviceDisplayNameController,
                         decoration: const InputDecoration(
@@ -139,19 +146,37 @@ class _AddDevicePopupCardState extends State<AddDevicePopupCard> {
                       // ),
                       TextButton(
                         onPressed: () {
+                          // setState(() {
+                          //   _errorMsg = null; // clear any existing errors
+                          // });
+                          bool added = false;
                           if (_formKey.currentState?.validate() ?? false) {
                             final docRef = FirebaseFirestore.instance
                                 .collection("devices")
                                 .doc(deviceIDController.text);
                             docRef.get().then(
                               (DocumentSnapshot doc) {
+                                if (!doc.exists) {
+                                  setState(() {
+                                    _errorMsg =
+                                        "Device not exist!"; // clear any existing errors
+                                  });
+                                  return;
+                                }
                                 if (doc['owner'].toString().isEmpty) {
                                   doc.reference.update({
                                     'owner':
                                         FirebaseAuth.instance.currentUser?.uid,
                                     'name': deviceDisplayNameController.text,
+                                  }).then((value) => Navigator.pop(context));
+
+                                  added = true;
+                                } else {
+                                  setState(() {
+                                    _errorMsg =
+                                        "Device already claimed!"; // clear any existing errors
                                   });
-                                } else {}
+                                }
                               },
                               onError: (e) =>
                                   debugPrint("Error getting document: $e"),

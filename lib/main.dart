@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -16,10 +17,11 @@ Future<void> main() async {
 
   FirebaseUIAuth.configureProviders([
     EmailAuthProvider(),
-     //GoogleProvider(clientId: "146521422465-e67nhfmdd198em738a7ugvbu7lf9mav5.apps.googleusercontent.com"),
+    //GoogleProvider(clientId: "146521422465-e67nhfmdd198em738a7ugvbu7lf9mav5.apps.googleusercontent.com"),
     // ... other providers
   ]);
-
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  debugPrint(fcmToken);
   runApp(const MyApp());
 }
 
@@ -32,7 +34,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: mainTheme(),
-      initialRoute: FirebaseAuth.instance.currentUser == null ? LoginPage.routeName : DeviceSelectionPage.routeName,
+      initialRoute: FirebaseAuth.instance.currentUser == null
+          ? LoginPage.routeName
+          : DeviceSelectionPage.routeName,
       routes: {
         LoginPage.routeName: (context) => const LoginPage(),
         DeviceSelectionPage.routeName: (context) => const DeviceSelectionPage(),

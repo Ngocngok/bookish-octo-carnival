@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:indoor_plant_watering_app/src/features/device_monitoring/representation/device_monitoring_page.dart';
 
@@ -77,16 +78,56 @@ class _DeviceItemState extends State<DeviceItem> {
                                   fontSize: 16),
                             ),
                           ),
-                          IconButton(
-                            iconSize: 30,
-                            icon: const Icon(
-                              Icons.more_vert_rounded,
+                          // IconButton(
+                          //   iconSize: 30,
+                          //   icon: const Icon(
+                          //     Icons.more_vert_rounded,
+                          //     color: Colors.white,
+                          //   ),
+                          //   onPressed: (() {
+                          //     debugPrint('b');
+                          //   }),
+                          // ),
+                          PopupMenuButton(
+                            icon: Icon(
+                              Icons.more_vert_outlined,
                               color: Colors.white,
                             ),
-                            onPressed: (() {
-                              debugPrint('b');
-                            }),
-                          ),
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry>[
+                              PopupMenuItem(
+                                child: Row(
+                                  children: const [
+                                    Icon(
+                                      Icons.delete,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text("Delete"),
+                                  ],
+                                ),
+                                onTap: () {
+                                  final docRef = FirebaseFirestore.instance
+                                      .collection("devices")
+                                      .doc(widget.deviceID);
+                                  docRef.get().then(
+                                    (DocumentSnapshot doc) {
+                                      if (doc['owner'].toString().isNotEmpty) {
+                                        doc.reference.update({
+                                          'owner': "",
+                                          'name': "",
+                                          'token': "",
+                                        });
+                                      } else {}
+                                    },
+                                    onError: (e) => debugPrint(
+                                        "Error getting document: $e"),
+                                  );
+                                },
+                              ),
+                            ],
+                          )
                         ],
                       ),
                     ),

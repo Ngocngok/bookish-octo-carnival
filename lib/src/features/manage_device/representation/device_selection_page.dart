@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +22,36 @@ class DeviceSelectionPage extends StatefulWidget {
 
 class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        debugPrint(
+            'Message also contained a notification: ${message.notification}');
+        final snackBar = SnackBar(
+          content: SizedBox(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(message.notification!.title!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                SizedBox(height: 5,),
+                Text(message.notification!.body!)
+              ],
+            ),
+          ),
+          action: SnackBarAction(
+            label: 'Ok',
+            onPressed: () {},
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
