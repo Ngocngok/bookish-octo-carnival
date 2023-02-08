@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,8 +20,10 @@ class ControlTab extends StatefulWidget {
 class _ControlTabState extends State<ControlTab> {
   StreamSubscription<DatabaseEvent>? pumpStatusStream;
   StreamSubscription<DatabaseEvent>? lastActiveTimeStream;
+  late Stream<DatabaseEvent> autoWateringStream;
   late DatabaseReference pumpStatusRef;
   late TextEditingController pickDurationTextController;
+  late DraggableScrollableController draggableScrollableController;
 
   bool pickDurationTextValidation = false;
 
@@ -36,7 +39,13 @@ class _ControlTabState extends State<ControlTab> {
 
   @override
   void initState() {
+    autoWateringStream = FirebaseDatabase.instance
+        .ref()
+        .child('devices/${widget.deviceID}/pump/autoWateringTime')
+        .onValue;
+
     pickDurationTextController = TextEditingController();
+    draggableScrollableController = DraggableScrollableController();
     pumpStatusRef =
         FirebaseDatabase.instance.ref("devices/${widget.deviceID}/pump");
 
@@ -144,6 +153,7 @@ class _ControlTabState extends State<ControlTab> {
   void dispose() {
     super.dispose();
     pickDurationTextController.dispose();
+    draggableScrollableController.dispose();
     pumpStatusStream?.cancel();
     lastActiveTimeStream?.cancel();
   }
@@ -196,7 +206,7 @@ class _ControlTabState extends State<ControlTab> {
                           Text(
                             pumpStatus ? "On" : "Idle",
                             style: TextStyle(
-                              color: pumpStatus ? Colors.green : Colors.grey,
+                              color: pumpStatus ? Colors.teal : Colors.grey,
                               fontSize: 28,
                               fontWeight: FontWeight.w600,
                             ),
@@ -255,7 +265,7 @@ class _ControlTabState extends State<ControlTab> {
                           //   color: Colors.teal,
                           //   width: 5,
                           // ),
-                          color: Colors.green[50],
+                          color: Colors.teal[50],
                         ),
                         child: SizedBox(
                           width: 180,
@@ -272,7 +282,7 @@ class _ControlTabState extends State<ControlTab> {
                                     Icon(
                                       Icons.notifications,
                                       size: 30,
-                                      color: Colors.teal,
+                                      color: Colors.teal[300],
                                     ),
                                     Switch(
                                       value: notificationStatus,
@@ -284,7 +294,7 @@ class _ControlTabState extends State<ControlTab> {
                                 Text(
                                   "Notifications",
                                   style: TextStyle(
-                                    color: Colors.teal,
+                                    color: Colors.teal[300],
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -294,7 +304,7 @@ class _ControlTabState extends State<ControlTab> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: notificationStatus
-                                        ? Colors.teal
+                                        ? Colors.teal[300]
                                         : Colors.grey,
                                   ),
                                 )
@@ -312,7 +322,7 @@ class _ControlTabState extends State<ControlTab> {
                           //   color: Colors.teal,
                           //   width: 5,
                           // ),
-                          color: Colors.green[50],
+                          color: Colors.teal[50],
                         ),
                         child: SizedBox(
                           width: 140,
@@ -330,21 +340,48 @@ class _ControlTabState extends State<ControlTab> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                SizedBox(
+                                  height: 20,
+                                ),
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.ideographic,
                                   children: [
                                     Text(
-                                      "60",
+                                      wateringDuration.toString(),
                                       style: TextStyle(
-                                        fontSize: 40,
+                                        fontSize: 35,
                                         fontWeight: FontWeight.w300,
-                                        color: notificationStatus
-                                            ? Colors.teal
-                                            : Colors.grey,
+                                        color: Colors.teal,
                                       ),
                                     ),
-                                    Text(" s"),
-                                    Icon(Icons.mode),
+                                    Text(
+                                      " s",
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.teal,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final duration = await pickDuration();
+                                        if (duration == null) {
+                                          return;
+                                        }
+                                        await pumpStatusRef
+                                            .child('duration')
+                                            .set(duration);
+                                        setState(() {
+                                          wateringDuration = duration;
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.mode,
+                                        color: Colors.teal[700],
+                                      ),
+                                    ),
                                   ],
                                 )
                               ],
@@ -363,6 +400,7 @@ class _ControlTabState extends State<ControlTab> {
           initialChildSize: .2,
           minChildSize: .2,
           maxChildSize: .5,
+          controller: draggableScrollableController,
           snap: true,
           builder: (BuildContext context, myScrollController) {
             return Stack(
@@ -373,26 +411,137 @@ class _ControlTabState extends State<ControlTab> {
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(30),
                     ),
-                    child: ListView(
-                      controller: myScrollController,
-                      children: [
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Colors.amber,
-                          ),
-                          child: SizedBox(
-                            height: 400,
-                          ),
-                        ),
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                          ),
-                          child: SizedBox(
-                            height: 400,
-                          ),
-                        ),
-                      ],
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 255, 205, 166),
+                      ),
+                      child: StreamBuilder(
+                        stream: autoWateringStream,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.active) {
+                            if (snapshot.data != null) {
+                              debugPrint(snapshot.data.toString());
+                              return ListView.builder(
+                                addAutomaticKeepAlives: true,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 40,
+                                ),
+                                controller: myScrollController,
+                                itemCount:
+                                    snapshot.data!.snapshot.children.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index == 0) {
+                                    return Padding(
+                                      padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Schedule",
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              final time = await pickTime(
+                                                  TimeOfDay.fromDateTime(
+                                                      DateTime.now()));
+                                              if (time == null) return;
+                                              final newPostKey = pumpStatusRef
+                                                  .child('autoWateringTime')
+                                                  .push()
+                                                  .key;
+                                              await pumpStatusRef
+                                                  .child('autoWateringTime')
+                                                  .update({
+                                                newPostKey!: time.hour * 3600 +
+                                                            time.minute * 60 >
+                                                        DateTime.now()
+                                                            .timeZoneOffset
+                                                            .inSeconds
+                                                    ? time.hour * 3600 +
+                                                        time.minute * 60 -
+                                                        DateTime.now()
+                                                            .timeZoneOffset
+                                                            .inSeconds
+                                                    : 86400 +
+                                                        time.hour * 3600 +
+                                                        time.minute * 60 -
+                                                        DateTime.now()
+                                                            .timeZoneOffset
+                                                            .inSeconds
+                                              });
+                                              // setState(() {
+                                              //   scheduledTime = TimeOfDay(hour: time.hour, minute: time.minute);
+                                              // });
+                                            },
+                                            child: Icon(
+                                              Icons.add,
+                                              size: 24,
+                                              color: Colors.grey[700],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  return pumpScheduleWidget(
+                                      schedule: int.parse(snapshot
+                                          .data!.snapshot.children
+                                          .elementAt(index - 1)
+                                          .value
+                                          .toString()),
+                                      key: snapshot.data!.snapshot.children
+                                          .elementAt(index - 1)
+                                          .key!);
+                                },
+                              );
+                            } else {
+                              debugPrint("emty");
+                              return SizedBox(
+                                width: 10,
+                              );
+                            }
+                          } else {
+                            return ListView(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 40,
+                              ),
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Schedule",
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 22,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -401,21 +550,49 @@ class _ControlTabState extends State<ControlTab> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        myScrollController.animateTo(
-                          1,
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.ease,
-                        );
+                        setState(() {
+                          draggableScrollableController.animateTo(.5,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                          // draggableScrollableController.jumpTo(.5);
+                        });
                       },
-                      child: Icon(Icons.menu, color: Colors.white),
+                      child: Icon(
+                        Icons.alarm_add,
+                        color: Colors.white,
+                      ),
                       style: ElevatedButton.styleFrom(
                         shape: CircleBorder(),
                         padding: EdgeInsets.all(20),
-                        backgroundColor: Colors.blue, // <-- Button color
-                        foregroundColor: Colors.red, // <-- Splash color
+                        backgroundColor:
+                            Colors.amberAccent[700], // <-- Button color
+                        foregroundColor: Colors.grey, // <-- Splash color
                       ),
                     )
                   ],
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: 20,
+                  //width: 100,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 255, 205, 166),
+                          Color.fromARGB(0, 255, 205, 166),
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                    child: SizedBox(
+                      height: 5,
+                      width: double.infinity,
+                    ),
+                  ),
                 ),
               ],
             );
@@ -515,7 +692,96 @@ class _ControlTabState extends State<ControlTab> {
     );
   }
 
-  Widget pumpScheduleWidget() {
+  Widget pumpScheduleWidget({required int schedule, required String key}) {
+    int epochToLocalTime =
+        schedule + DateTime.now().timeZoneOffset.inSeconds < 86400
+            ? schedule + DateTime.now().timeZoneOffset.inSeconds
+            : -86400 + schedule + DateTime.now().timeZoneOffset.inSeconds;
+    TimeOfDay currentTime = TimeOfDay(
+        hour: epochToLocalTime ~/ 3600,
+        minute: (epochToLocalTime % 3600) ~/ 60);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+      child: Row(
+        children: [
+          Icon(
+            Icons.alarm_on,
+            size: 22,
+            color: Colors.grey[700],
+          ),
+          SizedBox(
+            width: 15,
+          ),
+          Text(
+            "From",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          Text(
+            "${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Spacer(),
+          GestureDetector(
+            onTap: () async {
+              final time = await pickTime(currentTime);
+              if (time == null) return;
+              await pumpStatusRef.child('autoWateringTime/$key').set(
+                  time.hour * 3600 + time.minute * 60 >
+                          DateTime.now().timeZoneOffset.inSeconds
+                      ? time.hour * 3600 +
+                          time.minute * 60 -
+                          DateTime.now().timeZoneOffset.inSeconds
+                      : 86400 +
+                          time.hour * 3600 +
+                          time.minute * 60 -
+                          DateTime.now().timeZoneOffset.inSeconds);
+              // setState(() {
+              //   scheduledTime = TimeOfDay(hour: time.hour, minute: time.minute);
+              // });
+            },
+            child: Icon(
+              Icons.mode_edit_outline_outlined,
+              color: Colors.grey[700],
+              size: 22,
+            ),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          GestureDetector(
+            onTap: () async {
+              await pumpStatusRef
+                  .child('autoWateringTime/$key')
+                  .set(null)
+                  .then((_) {
+                // setState(() {
+                //   isAutoWateringOn = false;
+                // });
+              });
+            },
+            child: Icon(
+              Icons.delete_outline,
+              color: Colors.grey[700],
+              size: 22,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget pumpScheduleWidget1() {
     if (!isAutoWateringOn) {
       return GestureDetector(
           onTap: () async {
@@ -576,7 +842,7 @@ class _ControlTabState extends State<ControlTab> {
         ),
         GestureDetector(
           onTap: () async {
-            final time = await pickTime();
+            final time = await pickTime(TimeOfDay(hour: 1, minute: 1));
             if (time == null) return;
             await pumpStatusRef.child('autoWateringTime').set(
                 time.hour * 3600 + time.minute * 60 >
@@ -653,8 +919,8 @@ class _ControlTabState extends State<ControlTab> {
     );
   }
 
-  Future<TimeOfDay?> pickTime() {
-    return showTimePicker(context: context, initialTime: scheduledTime);
+  Future<TimeOfDay?> pickTime(TimeOfDay initTime) {
+    return showTimePicker(context: context, initialTime: initTime);
   }
 
   Future<int?> pickDuration() {
@@ -676,8 +942,9 @@ class _ControlTabState extends State<ControlTab> {
             decoration: InputDecoration(
               hintText: "Eg: 120",
               hintStyle: TextStyle(color: Colors.grey),
-              errorText:
-                  pickDurationTextValidation ? 'Value Can\'t Be Empty' : null,
+              errorText: pickDurationTextValidation
+                  ? 'Value should not smaller than 10!'
+                  : null,
             ),
           ),
           actions: [
